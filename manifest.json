@@ -1,0 +1,17 @@
+{
+  "short_name": "Tính Điện",
+  "name": "Tính Toán Thiết Bị Điện",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3103/3103310.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "index.html",
+  "background_color": "#2563eb",
+  "display": "standalone",
+  "scope": "./",
+  "theme_color": "#2563eb"
+}

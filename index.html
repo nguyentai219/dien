@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tính Toán Thiết Bị Điện</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3103/3103310.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        html, body { width: 100%; margin: 0; padding: 0; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        input, select, button { height: 54px !important; border-radius: 16px !important; font-size: 15px !important; width: 100%; outline: none !important; }
+        .card { background: white; border-radius: 24px; margin-bottom: 16px; overflow: hidden; border: 2px solid transparent; }
+        .tab-active { color: #2563eb; background: #eff6ff; border-bottom: 3px solid #2563eb; font-weight: 900; }
+        .spec-row { display: flex; justify-content: space-between; padding: 10px 16px; border-bottom: 1px dashed #f1f5f9; align-items: center; }
+        .label { color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .value { color: #1e293b; font-size: 14px; font-weight: 800; }
+        .card-motor { border-color: #fed7aa; }
+        .card-elec { border-color: #bfdbfe; }
+        .card-ac { border-color: #ddd6fe; }
+        .btn-delete-text { background: #fee2e2; color: #ef4444; font-size: 10px !important; font-weight: 900; height: 32px !important; width: auto !important; padding: 0 12px !important; border-radius: 10px !important; text-transform: uppercase; }
+    </style>
+</head>
+<body class="antialiased font-sans text-slate-900">
+
+<div class="w-full min-h-screen pb-24">
+    <div class="bg-gradient-to-r from-blue-700 to-blue-600 text-white p-6 pb-14 shadow-lg text-center">
+        <h1 class="text-lg font-black uppercase tracking-tight leading-tight">Tính Toán Thiết Bị Điện</h1>
+        <p class="text-[10px] font-medium opacity-90 mt-1 lowercase">(Thực hiện bởi TaiDauTieng@gmail.com)</p>
+    </div>
+
+    <div class="flex bg-white mx-4 -mt-8 rounded-2xl shadow-xl border border-slate-100 overflow-hidden relative z-10">
+        <button onclick="switchTab('general')" id="btn-general" class="flex-1 py-4 text-[11px] font-bold uppercase transition-all tab-active">Thiết bị tổng</button>
+        <button onclick="switchTab('ac')" id="btn-ac" class="flex-1 py-4 text-[11px] font-bold uppercase transition-all text-slate-400">Máy lạnh (m³)</button>
+    </div>
+
+    <div id="tab-general" class="p-4">
+        <div class="card p-5 border-none shadow-md mb-6">
+            <div class="space-y-3">
+                <input type="text" id="deviceName" placeholder="Tên thiết bị (Bơm, Đèn...)" class="bg-slate-50 px-4 border-2 border-slate-100 font-bold">
+                <div class="flex gap-2">
+                    <input type="number" id="deviceValue" placeholder="Công suất..." class="flex-1 bg-slate-50 px-4 border-2 border-slate-100 font-bold">
+                    <select id="unitType" onchange="autoSuggestLoadType()" class="w-1/3 bg-blue-50 text-blue-700 font-black px-3 border-2 border-blue-100">
+                        <option value="W">W</option><option value="KW">kW</option><option value="HP">HP</option>
+                    </select>
+                </div>
+                <select id="loadType" class="bg-orange-50 text-orange-700 font-black px-4 border-2 border-orange-100">
+                    <option value="ELECTRONIC">📱 Thiết bị điện tử</option>
+                    <option value="MOTOR">⚙️ Động cơ / Máy bơm</option>
+                </select>
+                <button onclick="addDevice()" class="bg-blue-600 text-white font-black shadow-lg active:scale-95 transition-all mt-2 uppercase tracking-widest">Thêm thiết bị +</button>
+            </div>
+        </div>
+        <div id="deviceContainer" class="space-y-4"></div>
+
+        <div id="summarySection" class="mt-8 hidden">
+            <div class="card p-6 border-blue-200 shadow-2xl space-y-6">
+                <div class="flex justify-between items-center bg-blue-50 p-4 rounded-2xl">
+                    <span class="text-[11px] font-black text-blue-700 uppercase italic">Tổng tải toàn hệ thống</span>
+                    <span id="sumWatt" class="text-base font-black text-blue-800">0 W</span>
+                </div>
+                <div class="text-center">
+                    <p class="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Tổng dòng điện (I)</p>
+                    <p class="text-5xl font-black text-orange-600 leading-none"><span id="sumAmper">0.00</span><span class="text-2xl ml-1">A</span></p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-900 p-4 rounded-2xl text-center text-white"><p class="text-[9px] text-slate-500 uppercase font-bold mb-1">CB Tổng</p><span id="sumCB" class="font-black text-xl">-</span></div>
+                    <div class="bg-emerald-600 p-4 rounded-2xl text-center text-white"><p class="text-[9px] text-emerald-100 uppercase font-bold mb-1">Chọn Dây Tổng</p><span id="sumWire" class="font-black text-xl">-</span></div>
+                </div>
+                <button onclick="askConfirm('all')" class="w-full text-red-500 font-black text-[10px] uppercase pt-4 border-t border-slate-100">Xoá toàn bộ hệ thống</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-ac" class="p-4 hidden">
+        <div class="card p-5 border-purple-100 shadow-md mb-6">
+            <h3 class="text-purple-700 font-black text-[11px] uppercase mb-4 italic">Máy lạnh (m³)</h3>
+            <div class="space-y-3">
+                <input type="text" id="acRoomName" placeholder="Tên phòng..." class="bg-slate-50 px-4 border-2 border-slate-100 font-bold">
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="text-center"><p class="text-[9px] font-black text-slate-400 mb-1">Dài</p><input type="number" id="acD" placeholder="0.0" class="bg-slate-50 border-2 border-slate-100 text-center font-bold"></div>
+                    <div class="text-center"><p class="text-[9px] font-black text-slate-400 mb-1">Rộng</p><input type="number" id="acR" placeholder="0.0" class="bg-slate-50 border-2 border-slate-100 text-center font-bold"></div>
+                    <div class="text-center"><p class="text-[9px] font-black text-slate-400 mb-1">Cao</p><input type="number" id="acC" placeholder="0.0" class="bg-slate-50 border-2 border-slate-100 text-center font-bold"></div>
+                </div>
+                <button onclick="calculateAC()" class="bg-purple-600 text-white font-black shadow-lg active:scale-95 transition-all mt-2 uppercase">Tính & Thêm</button>
+            </div>
+        </div>
+        <div id="acResultContainer" class="space-y-4"></div>
+        <div id="acSummarySection" class="mt-8 hidden text-center">
+            <button onclick="askConfirm('ac_all')" class="text-red-400 font-bold text-[10px] uppercase italic underline">Xoá danh sách máy lạnh</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirmModal" class="fixed inset-0 z-[999] bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-6 opacity-0 transition-all duration-300">
+    <div id="modalContent" class="bg-white w-full max-w-xs rounded-[2rem] p-6 text-center scale-90 transition-transform duration-300">
+        <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-trash"></i></div>
+        <h3 class="text-sm font-black text-slate-800 mb-2 uppercase tracking-tight">Xác nhận xoá?</h3>
+        <p id="modalDesc" class="text-slate-500 text-xs mb-6 leading-relaxed font-bold italic"></p>
+        <div class="flex flex-col gap-2">
+            <button id="confirmBtn" class="bg-red-500 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-widest shadow-lg shadow-red-100">Đồng ý xoá</button>
+            <button onclick="closeModal()" class="bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-[10px]">Quay lại</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let devices = [], acList = [];
+    const VOLTAGE = 220, STANDARD_WIRES = [1.0, 1.5, 2.5, 4.0, 6.0, 10.0, 16.0];
+
+    window.onload = () => {
+        devices = JSON.parse(localStorage.getItem('elec_v18') || '[]');
+        acList = JSON.parse(localStorage.getItem('elec_ac_v18') || '[]');
+        refreshAll();
+    };
+
+    function switchTab(tab) {
+        document.getElementById('tab-general').classList.toggle('hidden', tab !== 'general');
+        document.getElementById('tab-ac').classList.toggle('hidden', tab !== 'ac');
+        document.getElementById('btn-general').classList.toggle('tab-active', tab === 'general');
+        document.getElementById('btn-ac').classList.toggle('tab-active', tab === 'ac');
+    }
+
+    function getDeviceIcon(name, type) {
+        const n = name.toLowerCase();
+        if (n.includes('bơm')) return '⚙️'; 
+        if (n.includes('đèn')) return '💡'; 
+        if (n.includes('quạt')) return '🌬️';
+        return type === 'MOTOR' ? '⚙️' : '📱';
+    }
+
+    function addDevice() {
+        const nI = document.getElementById('deviceName'), vI = document.getElementById('deviceValue'), u = document.getElementById('unitType').value, t = document.getElementById('loadType').value, v = parseFloat(vI.value);
+        if (isNaN(v) || v <= 0) return;
+        let w = (u === 'KW') ? v * 1000 : (u === 'HP' ? v * 746 : v);
+        const amp = w / (VOLTAGE * (t === 'MOTOR' ? 0.8 : 0.95));
+        devices.push({ 
+            id: Date.now(), name: nI.value || "Thiết bị", type: t, unit: u, 
+            displayUnit: `${v} ${u}`, watt: w, amper: amp, 
+            wire: STANDARD_WIRES.find(s => s >= amp/4) || 16.0, 
+            cb: (amp * 1.25).toFixed(0), icon: getDeviceIcon(nI.value || "", t) 
+        });
+        nI.value = ''; vI.value = ''; refreshAll();
+    }
+
+    function calculateAC() {
+        const nI = document.getElementById('acRoomName'), d = parseFloat(document.getElementById('acD').value), r = parseFloat(document.getElementById('acR').value), c = parseFloat(document.getElementById('acC').value);
+        if(!d || !r || !c) return;
+        const m3 = d * r * c, btu = m3 * 200;
+        let hpVal = 1.0; if(btu > 9000) hpVal = 1.5; if(btu > 13000) hpVal = 2.0; if(btu > 18000) hpVal = 2.5;
+        const amp = (hpVal * 746) / (VOLTAGE * 0.9);
+        acList.push({ id: Date.now(), name: nI.value || "Phòng AC", m3, btu: Math.round(btu), hp: hpVal, hpVal, amper: amp, wire: STANDARD_WIRES.find(s => s >= amp/4) || 16.0, cb: (amp * 1.25).toFixed(0) });
+        nI.value = ''; document.getElementById('acD').value = ''; document.getElementById('acR').value = ''; document.getElementById('acC').value = '';
+        refreshAll();
+    }
+
+    function askConfirm(type, id = null) {
+        const modal = document.getElementById('confirmModal'), desc = document.getElementById('modalDesc'), btn = document.getElementById('confirmBtn');
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+        setTimeout(() => { modal.classList.add('opacity-100'); document.getElementById('modalContent').classList.add('scale-100'); }, 10);
+        
+        if (type === 'single_device') {
+            const d = devices.find(x => x.id === id); desc.innerHTML = `Bạn muốn xoá <span class="text-red-500 font-black">"${d.name}"</span>?`;
+            btn.onclick = () => { devices = devices.filter(x => x.id !== id); finalizeDelete(); };
+        } else if (type === 'single_ac') {
+            const a = acList.find(x => x.id === id); desc.innerHTML = `Bạn muốn xoá máy lạnh <span class="text-red-500 font-black">"${a.name}"</span>?`;
+            btn.onclick = () => { acList = acList.filter(x => x.id !== id); finalizeDelete(); };
+        } else if (type === 'all') {
+            desc.innerHTML = "Xoá <span class='text-red-500 font-black'>TẤT CẢ</span> thiết bị?";
+            btn.onclick = () => { devices = []; acList = []; finalizeDelete(); };
+        }
+    }
+
+    function finalizeDelete() { refreshAll(); closeModal(); }
+    function closeModal() {
+        const modal = document.getElementById('confirmModal');
+        modal.classList.remove('opacity-100'); document.getElementById('modalContent').classList.remove('scale-100');
+        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 200);
+    }
+
+    function refreshAll() {
+        localStorage.setItem('elec_v18', JSON.stringify(devices));
+        localStorage.setItem('elec_ac_v18', JSON.stringify(acList));
+        
+        const dCont = document.getElementById('deviceContainer'); dCont.innerHTML = '';
+        let tW = 0, tI = 0;
+        
+        devices.forEach(d => {
+            tW += d.watt; tI += d.amper;
+            const originRow = d.unit !== 'W' ? `<div class="spec-row"><span class="label">Công suất gốc:</span><span class="value text-blue-600">${d.displayUnit}</span></div>` : '';
+            dCont.innerHTML += `<div class="card ${d.type === 'MOTOR' ? 'card-motor' : 'card-elec'}">
+                <div class="${d.type === 'MOTOR' ? 'bg-orange-50' : 'bg-blue-50'} px-5 py-3 border-b border-inherit flex justify-between items-center">
+                    <span class="text-xs font-black uppercase text-slate-700">${d.icon} ${d.name}</span>
+                    <button onclick="askConfirm('single_device', ${d.id})" class="btn-delete-text">Xoá thiết bị</button>
+                </div>
+                <div class="p-1 pb-2">
+                    ${originRow}
+                    <div class="spec-row"><span class="label">Quy đổi:</span><span class="value">${d.watt.toLocaleString()} W</span></div>
+                    <div class="spec-row bg-slate-50"><span class="label text-blue-600 font-black">Chọn CB:</span><span class="value text-blue-700 font-black">${d.cb} A</span></div>
+                    <div class="spec-row"><span class="label">Chọn dây dẫn:</span><span class="value text-emerald-600 font-bold">${d.wire} mm²</span></div>
+                </div></div>`;
+        });
+
+        const aCont = document.getElementById('acResultContainer'); aCont.innerHTML = '';
+        let acI = 0;
+        acList.forEach(a => { acI += a.amper; tW += (a.hpVal * 746);
+            aCont.innerHTML += `<div class="card card-ac shadow-sm">
+                <div class="bg-purple-50 px-5 py-3 border-b border-purple-100 flex justify-between items-center">
+                    <span class="text-xs font-black uppercase text-purple-700">❄️ ${a.name}</span>
+                    <button onclick="askConfirm('single_ac', ${a.id})" class="btn-delete-text">Xoá thiết bị</button>
+                </div>
+                <div class="p-1 pb-2">
+                    <div class="spec-row"><span class="label">Thể tích phòng:</span><span class="value">${a.m3.toFixed(1)} m³</span></div>
+                    <div class="spec-row bg-yellow-50"><span class="label text-orange-600 font-black">Chỉ số BTU:</span><span class="value text-orange-700 font-black">${a.btu.toLocaleString()} BTU</span></div>
+                    <div class="spec-row bg-purple-50"><span class="label text-purple-600 font-black">Chọn máy:</span><span class="value text-purple-800 font-black">${a.hp} HP</span></div>
+                    <div class="spec-row"><span class="label">Chọn CB:</span><span class="value text-blue-700 font-black">${a.cb} A</span></div>
+                    <div class="spec-row"><span class="label">Chọn dây dẫn:</span><span class="value text-emerald-600 font-bold">${a.wire} mm²</span></div>
+                </div></div>`;
+        });
+
+        const fI = tI + acI;
+        if (devices.length > 0 || acList.length > 0) {
+            document.getElementById('summarySection').classList.remove('hidden');
+            document.getElementById('sumWatt').innerText = tW.toLocaleString() + " W";
+            document.getElementById('sumAmper').innerText = fI.toFixed(2);
+            document.getElementById('sumCB').innerText = (fI * 1.25).toFixed(0) + " A";
+            document.getElementById('sumWire').innerText = (STANDARD_WIRES.find(s => s >= fI/4) || 16.0) + " mm²";
+        } else { document.getElementById('summarySection').classList.add('hidden'); }
+    }
+
+    function autoSuggestLoadType() {
+        const u = document.getElementById('unitType').value, l = document.getElementById('loadType');
+        l.value = (u === 'HP' || u === 'KW') ? 'MOTOR' : 'ELECTRONIC';
+    }
+</script>
+</body>
+</html>
