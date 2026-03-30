@@ -8,7 +8,8 @@
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3103/3103310.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -91,20 +92,17 @@
             </div>
         </div>
         <div id="acResultContainer" class="space-y-4"></div>
-        <div id="acSummarySection" class="mt-8 hidden text-center">
-            <button onclick="askConfirm('ac_all')" class="text-red-400 font-bold text-[10px] uppercase italic underline">Xoá danh sách máy lạnh</button>
-        </div>
     </div>
 </div>
 
 <div id="confirmModal" class="fixed inset-0 z-[999] bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-6 opacity-0 transition-all duration-300">
-    <div id="modalContent" class="bg-white w-full max-w-xs rounded-[2rem] p-6 text-center scale-90 transition-transform duration-300">
+    <div id="modalContent" class="bg-white w-full max-w-xs rounded-[2rem] p-6 text-center scale-90 transition-transform">
         <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-trash"></i></div>
-        <h3 class="text-sm font-black text-slate-800 mb-2 uppercase tracking-tight">Xác nhận xoá?</h3>
-        <p id="modalDesc" class="text-slate-500 text-xs mb-6 leading-relaxed font-bold italic"></p>
+        <h3 class="text-sm font-black text-slate-800 mb-2 uppercase">Xác nhận xoá?</h3>
+        <p id="modalDesc" class="text-slate-500 text-xs mb-6 leading-relaxed font-bold"></p>
         <div class="flex flex-col gap-2">
             <button id="confirmBtn" class="bg-red-500 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-widest shadow-lg shadow-red-100">Đồng ý xoá</button>
-            <button onclick="closeModal()" class="bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-[10px]">Quay lại</button>
+            <button onclick="closeModal()" class="bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-[10px]">Hủy bỏ</button>
         </div>
     </div>
 </div>
@@ -114,8 +112,8 @@
     const VOLTAGE = 220, STANDARD_WIRES = [1.0, 1.5, 2.5, 4.0, 6.0, 10.0, 16.0];
 
     window.onload = () => {
-        devices = JSON.parse(localStorage.getItem('elec_v18') || '[]');
-        acList = JSON.parse(localStorage.getItem('elec_ac_v18') || '[]');
+        devices = JSON.parse(localStorage.getItem('elec_v20') || '[]');
+        acList = JSON.parse(localStorage.getItem('elec_ac_v20') || '[]');
         refreshAll();
     };
 
@@ -128,9 +126,7 @@
 
     function getDeviceIcon(name, type) {
         const n = name.toLowerCase();
-        if (n.includes('bơm')) return '⚙️'; 
-        if (n.includes('đèn')) return '💡'; 
-        if (n.includes('quạt')) return '🌬️';
+        if (n.includes('bơm')) return '⚙️'; if (n.includes('đèn')) return '💡'; if (n.includes('quạt')) return '🌬️';
         return type === 'MOTOR' ? '⚙️' : '📱';
     }
 
@@ -139,12 +135,7 @@
         if (isNaN(v) || v <= 0) return;
         let w = (u === 'KW') ? v * 1000 : (u === 'HP' ? v * 746 : v);
         const amp = w / (VOLTAGE * (t === 'MOTOR' ? 0.8 : 0.95));
-        devices.push({ 
-            id: Date.now(), name: nI.value || "Thiết bị", type: t, unit: u, 
-            displayUnit: `${v} ${u}`, watt: w, amper: amp, 
-            wire: STANDARD_WIRES.find(s => s >= amp/4) || 16.0, 
-            cb: (amp * 1.25).toFixed(0), icon: getDeviceIcon(nI.value || "", t) 
-        });
+        devices.push({ id: Date.now(), name: nI.value || "Thiết bị", type: t, unit: u, displayUnit: `${v} ${u}`, watt: w, amper: amp, wire: STANDARD_WIRES.find(s => s >= amp/4) || 16.0, cb: (amp * 1.25).toFixed(0), icon: getDeviceIcon(nI.value || "", t) });
         nI.value = ''; vI.value = ''; refreshAll();
     }
 
@@ -163,12 +154,11 @@
         const modal = document.getElementById('confirmModal'), desc = document.getElementById('modalDesc'), btn = document.getElementById('confirmBtn');
         modal.classList.remove('hidden'); modal.classList.add('flex');
         setTimeout(() => { modal.classList.add('opacity-100'); document.getElementById('modalContent').classList.add('scale-100'); }, 10);
-        
         if (type === 'single_device') {
-            const d = devices.find(x => x.id === id); desc.innerHTML = `Bạn muốn xoá <span class="text-red-500 font-black">"${d.name}"</span>?`;
+            const d = devices.find(x => x.id === id); desc.innerHTML = `Xoá <span class="text-red-500">"${d.name}"</span>?`;
             btn.onclick = () => { devices = devices.filter(x => x.id !== id); finalizeDelete(); };
         } else if (type === 'single_ac') {
-            const a = acList.find(x => x.id === id); desc.innerHTML = `Bạn muốn xoá máy lạnh <span class="text-red-500 font-black">"${a.name}"</span>?`;
+            const a = acList.find(x => x.id === id); desc.innerHTML = `Xoá máy lạnh <span class="text-red-500">"${a.name}"</span>?`;
             btn.onclick = () => { acList = acList.filter(x => x.id !== id); finalizeDelete(); };
         } else if (type === 'all') {
             desc.innerHTML = "Xoá <span class='text-red-500 font-black'>TẤT CẢ</span> thiết bị?";
@@ -184,19 +174,17 @@
     }
 
     function refreshAll() {
-        localStorage.setItem('elec_v18', JSON.stringify(devices));
-        localStorage.setItem('elec_ac_v18', JSON.stringify(acList));
-        
+        localStorage.setItem('elec_v20', JSON.stringify(devices));
+        localStorage.setItem('elec_ac_v20', JSON.stringify(acList));
         const dCont = document.getElementById('deviceContainer'); dCont.innerHTML = '';
         let tW = 0, tI = 0;
-        
         devices.forEach(d => {
             tW += d.watt; tI += d.amper;
             const originRow = d.unit !== 'W' ? `<div class="spec-row"><span class="label">Công suất gốc:</span><span class="value text-blue-600">${d.displayUnit}</span></div>` : '';
             dCont.innerHTML += `<div class="card ${d.type === 'MOTOR' ? 'card-motor' : 'card-elec'}">
                 <div class="${d.type === 'MOTOR' ? 'bg-orange-50' : 'bg-blue-50'} px-5 py-3 border-b border-inherit flex justify-between items-center">
                     <span class="text-xs font-black uppercase text-slate-700">${d.icon} ${d.name}</span>
-                    <button onclick="askConfirm('single_device', ${d.id})" class="btn-delete-text">Xoá thiết bị</button>
+                    <button onclick="askConfirm('single_device', ${d.id})" class="btn-delete-text">Xoá</button>
                 </div>
                 <div class="p-1 pb-2">
                     ${originRow}
@@ -205,14 +193,13 @@
                     <div class="spec-row"><span class="label">Chọn dây dẫn:</span><span class="value text-emerald-600 font-bold">${d.wire} mm²</span></div>
                 </div></div>`;
         });
-
         const aCont = document.getElementById('acResultContainer'); aCont.innerHTML = '';
         let acI = 0;
         acList.forEach(a => { acI += a.amper; tW += (a.hpVal * 746);
             aCont.innerHTML += `<div class="card card-ac shadow-sm">
                 <div class="bg-purple-50 px-5 py-3 border-b border-purple-100 flex justify-between items-center">
                     <span class="text-xs font-black uppercase text-purple-700">❄️ ${a.name}</span>
-                    <button onclick="askConfirm('single_ac', ${a.id})" class="btn-delete-text">Xoá thiết bị</button>
+                    <button onclick="askConfirm('single_ac', ${a.id})" class="btn-delete-text">Xoá</button>
                 </div>
                 <div class="p-1 pb-2">
                     <div class="spec-row"><span class="label">Thể tích phòng:</span><span class="value">${a.m3.toFixed(1)} m³</span></div>
@@ -222,7 +209,6 @@
                     <div class="spec-row"><span class="label">Chọn dây dẫn:</span><span class="value text-emerald-600 font-bold">${a.wire} mm²</span></div>
                 </div></div>`;
         });
-
         const fI = tI + acI;
         if (devices.length > 0 || acList.length > 0) {
             document.getElementById('summarySection').classList.remove('hidden');
