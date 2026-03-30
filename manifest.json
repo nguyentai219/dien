@@ -15,9 +15,12 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "index.html",
+  "start_url": "./index.html",
   "background_color": "#2563eb",
   "display": "standalone",
   "scope": "./",
-  "theme_color": "#2563eb"
+  "theme_color": "#2563eb",
+  "description": "Ứng dụng tính toán công suất và chọn dây dẫn điện",
+  "orientation": "portrait"
 }
+
