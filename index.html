@@ -190,6 +190,7 @@
                 <div class="p-1 pb-2">
                     ${originRow}
                     <div class="spec-row"><span class="label">Quy đổi:</span><span class="value">${d.watt.toLocaleString()} W</span></div>
+                    <div class="spec-row"><span class="label text-orange-500 font-bold">Dòng tiêu thụ:</span><span class="value text-orange-600">${d.amper.toFixed(2)} A</span></div>
                     <div class="spec-row bg-slate-50"><span class="label text-blue-600 font-black">Chọn CB:</span><span class="value text-blue-700 font-black">${d.cb} A</span></div>
                     <div class="spec-row"><span class="label">Chọn dây dẫn:</span><span class="value text-emerald-600 font-bold">${d.wire} mm²</span></div>
                 </div></div>`;
@@ -206,6 +207,7 @@
                     <div class="spec-row"><span class="label">Thể tích phòng:</span><span class="value">${a.m3.toFixed(1)} m³</span></div>
                     <div class="spec-row bg-yellow-50"><span class="label text-orange-600 font-black">Chỉ số BTU:</span><span class="value text-orange-700 font-black">${a.btu.toLocaleString()} BTU</span></div>
                     <div class="spec-row bg-purple-50"><span class="label text-purple-600 font-black">Chọn máy:</span><span class="value text-purple-800 font-black">${a.hp} HP</span></div>
+                    <div class="spec-row"><span class="label text-orange-500 font-bold">Dòng tiêu thụ:</span><span class="value text-orange-600">${a.amper.toFixed(2)} A</span></div>
                     <div class="spec-row"><span class="label">Chọn CB:</span><span class="value text-blue-700 font-black">${a.cb} A</span></div>
                     <div class="spec-row"><span class="label">Chọn dây dẫn:</span><span class="value text-emerald-600 font-bold">${a.wire} mm²</span></div>
                 </div></div>`;
@@ -225,15 +227,13 @@
         l.value = (u === 'HP' || u === 'KW') ? 'MOTOR' : 'ELECTRONIC';
     }
 
-    // PHẦN QUAN TRỌNG: ĐĂNG KÝ APP XỊN (PWA)
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('App đã sẵn sàng!'))
-                .catch(err => console.log('Lỗi đăng ký App:', err));
+                .then(reg => console.log('PWA Ready'))
+                .catch(err => console.log('PWA Error', err));
         });
     }
 </script>
 </body>
 </html>
-
