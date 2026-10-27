@@ -109,12 +109,18 @@
 </div>
 
 <script>
+    // Chuyển dữ liệu sang khoá có tiền tố riêng của app (1 lần, xoá khoá cũ vì chỉ app này dùng) — các app trên
+    // nguyentai219.github.io dùng chung localStorage nên khoá phải có tiền tố riêng để không đè nhau.
+    (function(){ try{ if (localStorage.getItem('dien_migrated_v1')) return;
+      [['elec_v20','dien_elec_v20'],['elec_ac_v20','dien_elec_ac_v20']].forEach(function(p){ var v = localStorage.getItem(p[0]);
+        if (v !== null && localStorage.getItem(p[1]) === null) localStorage.setItem(p[1], v); localStorage.removeItem(p[0]); });
+      localStorage.setItem('dien_migrated_v1', '1'); }catch(e){} })();
     let devices = [], acList = [];
     const VOLTAGE = 220, STANDARD_WIRES = [1.0, 1.5, 2.5, 4.0, 6.0, 10.0, 16.0];
 
     window.onload = () => {
-        devices = JSON.parse(localStorage.getItem('elec_v20') || '[]');
-        acList = JSON.parse(localStorage.getItem('elec_ac_v20') || '[]');
+        devices = JSON.parse(localStorage.getItem('dien_elec_v20') || '[]');
+        acList = JSON.parse(localStorage.getItem('dien_elec_ac_v20') || '[]');
         refreshAll();
     };
 
@@ -175,8 +181,8 @@
     }
 
     function refreshAll() {
-        localStorage.setItem('elec_v20', JSON.stringify(devices));
-        localStorage.setItem('elec_ac_v20', JSON.stringify(acList));
+        localStorage.setItem('dien_elec_v20', JSON.stringify(devices));
+        localStorage.setItem('dien_elec_ac_v20', JSON.stringify(acList));
         const dCont = document.getElementById('deviceContainer'); dCont.innerHTML = '';
         let tW = 0, tI = 0;
         devices.forEach(d => {
